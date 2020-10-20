@@ -6,6 +6,9 @@ import math
 
 UTid = 1385
 
-webpage = requests.get( "https://www.ratemyprofessors.com/filter/professor/?&page=1&filter=teacherlastname_sort_asc&query=*%3A*&queryoption=TEACHER&queryBy=schoolId&sid=" + str( UTid ) )
+webpage = requests.get( "https://www.ratemyprofessors.com/filter/professor/?&page=1&filter=teacherlastname_sort_s+asc&query=*%3A*&queryoption=TEACHER&queryBy=schoolId&sid=" + str( UTid ) )
 
-print( webpage.content )
+jsonpage = json.loads( webpage.content )
+num_professors = jsonpage["remaining"] + 20
+
+print( "Got " + str( num_professors ) + " professors" )
