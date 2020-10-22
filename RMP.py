@@ -3,6 +3,7 @@
 import requests
 import json
 import math
+from bs4 import BeautifulSoup
 
 UTid = 1385
 
@@ -17,6 +18,7 @@ print( "Got " + str( num_professors ) + " professors" )
 listOfProfs = []
 pageCount = math.ceil(num_professors / 20)
 
+
 # cycle through profs
 for i in range (pageCount):
     # get profs on each page
@@ -24,12 +26,28 @@ for i in range (pageCount):
     jsonPage = json.loads(profsOnCurrentPage.content)
     currentPageList = jsonPage['professors']
     
+    listOfProfs.extend(currentPageList)
+    
     for j in range (len(currentPageList)):
        # print out teacher full name
        print(str(currentPageList[j]['tFname']) + " " + str(currentPageList[j]['tLname']))
-    listOfProfs.extend(currentPageList)
+       profURL = "https://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + str(currentPageList[j]['tid'])
+       profPage = requests.get(profURL)
+       profInfo = BeautifulSoup(profPage.text, "html.parser")
+       print(profInfo)
+       # TODO: figure out what they're labeling tags as
+       profTags = profInfo.findAll("span", {"class": "tag-box-choosetags" })
+       for tag in profTags:
+           print(tag.get_text())
 
+
+# merge same prof (variance?) 
 print(str(listOfProfs[0]))
+
+# which college has hottest profs??? (chili pepper)
+
+
+
 """
 for i in range (len(listOfProfs)):
     print(str(listOfProfs[i]))
