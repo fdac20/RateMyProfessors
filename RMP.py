@@ -20,15 +20,6 @@ class Review():
         self.difficulty = difficulty
 
 class Professor():
-    numReviews = 0
-    reviews = []
-    department = ""
-    firstName = ""
-    middleName = ""
-    lastName = ""
-    fullName = ""
-    overallRating = 0.0
-
     def __init__( self, numReviews, department, firstName, middleName, lastName, overallRating ):
         self.numReviews = numReviews
         self.department = department
@@ -37,9 +28,18 @@ class Professor():
         self.lastName = lastName
         self.fullName = firstName + " " + lastName
         self.overallRating = overallRating
+        self.reviews = []
 
     def addReview( self, review ):
         self.reviews.append( review )
+
+    def print( self ):
+        print( "Name: " + self.fullName + ":" )
+        print( "Department: " + self.department )
+        print( str( self.numReviews ) + " reviews" )
+        print( "Length of reviews list: " + str( len( self.reviews ) ) )
+        print( "Overall rating: " + str( self.overallRating ) )
+        print()
     
 #This the UT's school ID on RateMyProfessors.
 UTid = 1385
@@ -54,10 +54,13 @@ num_professors = jsonpage["remaining"] + 20
 print( "Got " + str( num_professors ) + " professors" )
 
 # what to get??
-#listOfProfs = []
+listOfProfs = []
 pageCount = math.ceil(num_professors / 20)
 
 professors = {}
+professorsWithoutReviews = {}
+numProfsWithReviews = 0
+numProfsWithoutReviews = 0
 
 # cycile through profs
 for i in range (pageCount):
@@ -66,13 +69,25 @@ for i in range (pageCount):
     jsonPage = json.loads(profsOnCurrentPage.content)
     currentPageList = jsonPage['professors']
     
-    #listOfProfs.extend(currentPageList)
+    listOfProfs.extend(currentPageList)
   
     for j in range (len(currentPageList)):
+       #print( currentPageList[j] )
+
+       if currentPageList[j]['overall_rating'] != "N/A":
+           professorP = Professor( int( currentPageList[j]['tNumRatings'] ), currentPageList[j]['tDept'], currentPageList[j]['tFname'], currentPageList[j]['tMiddlename'], currentPageList[j]['tLname'], float( currentPageList[j]['overall_rating'] ) )
+           numProfsWithReviews += 1
+       else:
+           professorP = Professor( int( currentPageList[j]['tNumRatings'] ), currentPageList[j]['tDept'], currentPageList[j]['tFname'], currentPageList[j]['tMiddlename'], currentPageList[j]['tLname'], 0.0 )
+           numProfsWithoutReviews += 1
+           continue
+
+       continue
+
        #if str(currentPageList[j]['tLname']) != "Plank" or str(currentPageList[j]['tFname']) != "James": #<<used for testing
         #   continue
        # print out teacher full name
-       print(str(currentPageList[j]['tFname']) + " " + str(currentPageList[j]['tLname']))
+       #print(str(currentPageList[j]['tFname']) + " " + str(currentPageList[j]['tLname']))
        profURL = "https://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + str(currentPageList[j]['tid'])
        profPage = requests.get(profURL)
        profInfo = BeautifulSoup(profPage.text, "html.parser")
@@ -80,16 +95,21 @@ for i in range (pageCount):
        #classes: Tag-bs9vf4-0, jqEvsD
        profTags = profInfo.findAll("span", {"class": "Tag-bs9vf4-0 jqEvsD" })
        for tag in profTags:
-           print(tag.get_text())
+           #print(tag.get_text())
+           continue
 
        #body of review:
        profBody = profInfo.findAll("div", {"class": "Comments__StyledComments-dzzyvm-0 dvnRbr" })
        for tag in profBody:
-          print(tag.get_text())
+          #print(tag.get_text())
+          continue
        #print()
 
 # merge same prof (variance?) 
 #print(str(listOfProfs[0]))
+
+print( "There are " + str( numProfsWithReviews ) + " professors with reviews." )
+print( "There are " + str( numProfsWithoutReviews ) + " professors without reviews." )
 
 """
 for i in range (len(listOfProfs)):
