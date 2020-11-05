@@ -4,8 +4,10 @@ import requests
 import json
 import math
 from bs4 import BeautifulSoup
+import argparse
 
-#TODO: make everything lowercase, add sleep, make professor class (then put the things in it and make a dictionary of professors), get individual ratings instead of just overall 
+#TODO: make everything lowercase, add sleep, get individual ratings instead of just overall, create main, make scraping into a function,
+#add argument parser, write scraped data to json file for storage, write function to load json data from stored file
 
 class Review():
     reviewBody = ""
