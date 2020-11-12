@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 
+'''
+RateMyProfessors Project:
+Gather review information for all UT professors,
+perform frequency and sentiment analysis.
+Calculate overall review of UT professors
+and different departments.
+'''
+
 import requests
 import json
 import math
@@ -37,7 +45,7 @@ class Professor():
         print( "Overall rating: " + str( self.overallRating ) )
         print()
    
-def scrape():
+def scrape( fileName ):
     #This the UT's school ID on RateMyProfessors.
     UTid = 1385
 
@@ -120,17 +128,22 @@ def loadJson( fileName ):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument( "-s", dest = "scrape", required = True )
-    parser.add_argument( "-f", dest = "file", required = False )
+    parser.add_argument( "-i", dest = "input", required = False )
+    parser.add_argument( "-o", dest = "output", required = False )
 
     args = parser.parse_args()
 
     if args.scrape.lower() == "true" or args.scrape.lower() == "t":
         print( "Scrape is set to true. Calling scrape function." )
-        scrape()
+        if args.output is not None:
+            scrape( args.output )
+        else:
+            print( "File for writing scraped data is not specified. Use -o option with output file name." )
+            exit()
     else:
         print( "Scrape is set to false. Calling load function." )
-        if args.file is not None:
-            loadJson( args.file )
+        if args.input is not None:
+            loadJson( args.input )
         else:
-            print( "File for loading JSON is not specified. Use -f option with file name." )
+            print( "File for loading JSON is not specified. Use -i option with input file name." )
             exit()
