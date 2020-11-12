@@ -6,6 +6,10 @@ Gather review information for all UT professors,
 perform frequency and sentiment analysis.
 Calculate overall review of UT professors
 and different departments.
+
+Rachel Harris
+Shivam Patel
+Madeline Phillips
 '''
 
 import requests
@@ -14,7 +18,22 @@ import math
 from bs4 import BeautifulSoup
 import argparse
 
-#TODO: make everything lowercase, add sleep, get individual ratings instead of just overall, write scraped data to json file for storage, write function to load json data from stored file
+#TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+'''
+TODO
+@scrape:
+add sleep
+get individual (quality and difficulty) ratings for reviews instead of just overall
+write scraped data to json file for storage
+
+@analysis:
+make everything lowercase
+????: merge same professors (variance?)
+
+@load json:
+write function to load json data from stored file
+'''
+#TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 
 class Review():
     def __init__( self, reviewBody, reviewTags, quality, difficulty ):
@@ -22,6 +41,18 @@ class Review():
         self.reviewTags = reviewTags
         self.quality = quality
         self.difficulty = difficulty
+
+    def print( self ):
+        print( "Quality: " + str( self.quality ) )
+        print( "Difficulty: " + str( self.difficulty ) )
+        print()
+        print( "Tags:" )
+        for tag in self.reviewTags:
+            print( tag )
+        print()
+        print( "Review:" )
+        print( self.reviewBody )
+        print()
 
 class Professor():
     def __init__( self, numReviews, department, firstName, middleName, lastName, overallRating ):
@@ -46,6 +77,8 @@ class Professor():
         print()
    
 def scrape( fileName ):
+    print( "Printing scraped information to " + fileName + "." )
+
     #This the UT's school ID on RateMyProfessors.
     UTid = 1385
 
@@ -58,71 +91,56 @@ def scrape( fileName ):
 
     print( "Got " + str( num_professors ) + " professors" )
 
-    # what to get??
+    iteration = 0
     listOfProfs = []
-    pageCount = math.ceil(num_professors / 20)
+    pageCount = math.ceil( num_professors / 20 )
 
     professors = {}
     professorsWithoutReviews = {}
     numProfsWithReviews = 0
     numProfsWithoutReviews = 0
+    totalReviews = 0
 
-    # cycile through profs
-    for i in range (pageCount):
-        # get profs on each page
-        profsOnCurrentPage = requests.get("http://www.ratemyprofessors.com/filter/professor/?&page=" + str(i) + "&filter=teacherlastname_sort_s+asc&query=*%3A*&queryoption=TEACHER&queryBy=schoolId&sid=" + str(UTid))
-        jsonPage = json.loads(profsOnCurrentPage.content)
+    #Iterate through pages.
+    for i in range( pageCount ):
+        #Get professors on each page.
+        profsOnCurrentPage = requests.get( "http://www.ratemyprofessors.com/filter/professor/?&page=" + str( i ) + "&filter=teacherlastname_sort_s+asc&query=*%3A*&queryoption=TEACHER&queryBy=schoolId&sid=" + str( UTid ) )
+        jsonPage = json.loads( profsOnCurrentPage.content )
         currentPageList = jsonPage['professors']
         
-        listOfProfs.extend(currentPageList)
+        #Add professors to list to professors.
+        listOfProfs.extend( currentPageList )
   
-        for j in range (len(currentPageList)):
-           #print( currentPageList[j] )
+        #Iterate through each professor.
+        for j in range( len( currentPageList ) ):
+            #Get overall information about professor.
+            if currentPageList[j]['overall_rating'] != "N/A":
+                professorP = Professor( int( currentPageList[j]['tNumRatings'] ), currentPageList[j]['tDept'], currentPageList[j]['tFname'], currentPageList[j]['tMiddlename'], currentPageList[j]['tLname'], float( currentPageList[j]['overall_rating'] ) )
+                numProfsWithReviews += 1
+            else:
+                professorP = Professor( int( currentPageList[j]['tNumRatings'] ), currentPageList[j]['tDept'], currentPageList[j]['tFname'], currentPageList[j]['tMiddlename'], currentPageList[j]['tLname'], 0.0 )
+                numProfsWithoutReviews += 1
+                continue
 
-           if currentPageList[j]['overall_rating'] != "N/A":
-               professorP = Professor( int( currentPageList[j]['tNumRatings'] ), currentPageList[j]['tDept'], currentPageList[j]['tFname'], currentPageList[j]['tMiddlename'], currentPageList[j]['tLname'], float( currentPageList[j]['overall_rating'] ) )
-               numProfsWithReviews += 1
-           else:
-               professorP = Professor( int( currentPageList[j]['tNumRatings'] ), currentPageList[j]['tDept'], currentPageList[j]['tFname'], currentPageList[j]['tMiddlename'], currentPageList[j]['tLname'], 0.0 )
-               numProfsWithoutReviews += 1
-               continue
+            #Get professor's page.
+            profURL = "https://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + str(currentPageList[j]['tid'])
+            profPage = requests.get( profURL )
+            profInfo = BeautifulSoup( profPage.text, "html.parser" )
+            #Get tags. classes: Tag-bs9vf4-0, jqEvsD
+            profTags = profInfo.findAll( "span", { "class": "Tag-bs9vf4-0 jqEvsD" } )
 
-           continue
+            #Get review bodies. classes: Comments__StyledComments-dzzyvm-0 dvnRbr
+            profBody = profInfo.findAll( "div", { "class": "Comments__StyledComments-dzzyvm-0 dvnRbr" } )
 
-           #if str(currentPageList[j]['tLname']) != "Plank" or str(currentPageList[j]['tFname']) != "James": #<<used for testing
-            #   continue
-           # print out teacher full name
-           #print(str(currentPageList[j]['tFname']) + " " + str(currentPageList[j]['tLname']))
-           profURL = "https://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + str(currentPageList[j]['tid'])
-           profPage = requests.get(profURL)
-           profInfo = BeautifulSoup(profPage.text, "html.parser")
-           # print(profInfo)
-           #classes: Tag-bs9vf4-0, jqEvsD
-           profTags = profInfo.findAll("span", {"class": "Tag-bs9vf4-0 jqEvsD" })
-           for tag in profTags:
-               #print(tag.get_text())
-               continue
-
-           #body of review:
-           profBody = profInfo.findAll("div", {"class": "Comments__StyledComments-dzzyvm-0 dvnRbr" })
-           for tag in profBody:
-              #print(tag.get_text())
-              continue
-           #print()
-
-    # merge same prof (variance?) 
-    #print(str(listOfProfs[0]))
+        iteration += 1
+        if iteration % 100 == 0:
+            print( "Finished " + str( iteration ) + " professors." )
 
     print( "There are " + str( numProfsWithReviews ) + " professors with reviews." )
     print( "There are " + str( numProfsWithoutReviews ) + " professors without reviews." )
 
-    """
-    for i in range (len(listOfProfs)):
-        print(str(listOfProfs[i]))
-    """
-
 def loadJson( fileName ):
-    #TODO
+    #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
     print( "TODO " + fileName )
 
 if __name__ == "__main__":
