@@ -22,9 +22,9 @@ import argparse
 '''
 TODO
 @scrape:
-add sleep
-get individual (quality and difficulty) ratings for reviews instead of just overall
-write scraped data to json file for storage
+!add sleep
+!!!get more than 20 reviews!
+!!write scraped data to json file for storage
 
 @analysis:
 make everything lowercase
@@ -185,6 +185,8 @@ def scrape( fileName ):
     print( "There are " + str( numProfsWithReviews ) + " professors with reviews." )
     print( "There are " + str( numProfsWithoutReviews ) + " professors without reviews." )
 
+    return professors, numProfsWithReviews, professorsWithoutReviews, numProfsWithoutReviews
+
 def loadJson( fileName ):
     #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
     print( "TODO " + fileName )
@@ -200,7 +202,7 @@ if __name__ == "__main__":
     if args.scrape.lower() == "true" or args.scrape.lower() == "t":
         print( "Scrape is set to true. Calling scrape function." )
         if args.output is not None:
-            scrape( args.output )
+            profsWR, numProfsWR, profsWNoR, numProfsWNoR = scrape( args.output )
         else:
             print( "File for writing scraped data is not specified. Use -o option with output file name." )
             exit()
