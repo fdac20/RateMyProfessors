@@ -37,7 +37,7 @@ write function to load json data from stored file
 
 class Review():
     def __init__( self, reviewBody, reviewTags, quality, difficulty ):
-        self.reviewBody = reviwBody
+        self.reviewBody = reviewBody
         self.reviewTags = reviewTags
         self.quality = quality
         self.difficulty = difficulty
@@ -126,11 +126,57 @@ def scrape( fileName ):
             profURL = "https://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + str(currentPageList[j]['tid'])
             profPage = requests.get( profURL )
             profInfo = BeautifulSoup( profPage.text, "html.parser" )
-            #Get tags. classes: Tag-bs9vf4-0, jqEvsD
-            profTags = profInfo.findAll( "span", { "class": "Tag-bs9vf4-0 jqEvsD" } )
 
-            #Get review bodies. classes: Comments__StyledComments-dzzyvm-0 dvnRbr
-            profBody = profInfo.findAll( "div", { "class": "Comments__StyledComments-dzzyvm-0 dvnRbr" } )
+            #Get reviews. classes: Rating__RatingBody-sc-1rhvpxz-0, dGrvXb
+            profReviews = profInfo.findAll( "div", { "class": "Rating__RatingBody-sc-1rhvpxz-0 dGrvXb" } )
+
+            #Iterate through each review.
+            for review in profReviews:
+                #Get div for tags.
+                tagsDiv = review.findAll( "div", { "class": "RatingTags__StyledTags-sc-1boeqx2-0 eLpnFv" } )
+
+                if len( tagsDiv ) > 0:
+                    #Get tags from div. classes: Tag-bs9vf4-0, hHOVKF
+                    tagSpans = tagsDiv[0].findAll( "span", { "class": "Tag-bs9vf4-0 hHOVKF" } )
+
+                profTags = []
+                for span in tagSpans:
+                    profTags.append( span.text )            
+
+                #Get review body. classes: Comments__StyledComments-dzzyvm-0, gRjWel
+                bodyDiv = review.findAll( "div", { "class": "Comments__StyledComments-dzzyvm-0 gRjWel" } )
+                profBody = bodyDiv[0].text
+
+                #Get quality rating. classes: RatingValues__RatingValue-sc-6dc747-3, kLWEWI, gQotpy, lbaFTo
+                qualityDiv = review.findAll( "div", { "class": "RatingValues__RatingValue-sc-6dc747-3 kLWEWI" } )
+                if len( qualityDiv ) < 1:
+                    qualityDiv = review.findAll( "div", { "class": "RatingValues__RatingValue-sc-6dc747-3 gQotpy" } )
+                    if len( qualityDiv ) < 1:
+                        qualityDiv = review.findAll( "div", { "class": "RatingValues__RatingValue-sc-6dc747-3 lbaFTo" } )
+
+                profQuality = qualityDiv[0].text
+
+                #Get difficulty rating. classes: RatingValues__RatingValue-sc-6dc747-3, jILzuI
+                difficultyDiv = review.findAll( "div", { "class": "RatingValues__RatingValue-sc-6dc747-3 jILzuI" } )
+                profDifficulty = difficultyDiv[0].text
+
+                #Create review object and add it to professor object's list.
+                professorReview = Review( profBody, profTags, profQuality, profDifficulty )
+                professorP.addReview( professorReview )
+
+            #print( professorP.fullName + ": " + str( professorP.numReviews ) + " reviews, list: " + str( len( professorP.reviews ) ) )
+
+            #Add professor to list of professors.
+            if len( professorP.reviews ) == 0:
+                professorsWithoutReviews[professorP.firstName] = professorP
+                professorsWithoutReviews[professorP.lastName] = professorP
+                professorsWithoutReviews[professorP.fullName] = professorP
+            else:
+                professors[professorP.firstName] = professorP
+                professors[professorP.lastName] = professorP
+                professors[professorP.fullName] = professorP
+
+            totalReviews += len( professorP.reviews )
 
         iteration += 1
         if iteration % 100 == 0:
