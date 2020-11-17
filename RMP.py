@@ -17,6 +17,7 @@ import json
 import math
 from bs4 import BeautifulSoup
 import argparse
+from selenium import webdriver # for clicking "more" button
 
 #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 '''
@@ -77,6 +78,8 @@ class Professor():
         print()
    
 def scrape( fileName ):
+    
+
     print( "Printing scraped information to " + fileName + "." )
 
     #This the UT's school ID on RateMyProfessors.
@@ -124,6 +127,13 @@ def scrape( fileName ):
 
             #Get professor's page.
             profURL = "https://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + str(currentPageList[j]['tid'])
+            
+	    # click "Load More Ratings" button
+            driver = webdriver.Chrome()
+            driver.get(profURL)
+            loadMoreButton = driver.find_element_by_class_name("Buttons__Button-sc-19xdot-1 PaginationButton__StyledPaginationButton-txi1dr-1 eaZArN")
+            loadMoreButton.click()
+	    
             profPage = requests.get( profURL )
             profInfo = BeautifulSoup( profPage.text, "html.parser" )
 
