@@ -128,11 +128,17 @@ def scrape( fileName ):
             #Get professor's page.
             profURL = "https://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + str(currentPageList[j]['tid'])
             
-	    # click "Load More Ratings" button
+            # figure out how many times you need to load more reviews
+            numButtonClicks = math.ceil(professorP.numReviews / 20)
+            
+            # prepare button for clicking
             driver = webdriver.Chrome()
             driver.get(profURL)
             loadMoreButton = driver.find_element_by_class_name("Buttons__Button-sc-19xdot-1 PaginationButton__StyledPaginationButton-txi1dr-1 eaZArN")
-            loadMoreButton.click()
+            
+            for i in range(numButtonClicks - 1):
+	        # click "Load More Ratings" button
+                loadMoreButton.click()
 	    
             profPage = requests.get( profURL )
             profInfo = BeautifulSoup( profPage.text, "html.parser" )
