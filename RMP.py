@@ -17,7 +17,11 @@ import json
 import math
 from bs4 import BeautifulSoup
 import argparse
-from selenium import webdriver # for clicking "more" button
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
 
 #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 '''
@@ -77,11 +81,7 @@ class Professor():
         print( "Overall rating: " + str( self.overallRating ) )
         print()
    
-def scrape( fileName ):
-    
-
-    print( "Printing scraped information to " + fileName + "." )
-
+def scrape():    
     #This the UT's school ID on RateMyProfessors.
     UTid = 1385
 
@@ -106,6 +106,8 @@ def scrape( fileName ):
 
     #Iterate through pages.
     for i in range( pageCount ):
+        time.sleep( 5 )
+
         #Get professors on each page.
         profsOnCurrentPage = requests.get( "http://www.ratemyprofessors.com/filter/professor/?&page=" + str( i ) + "&filter=teacherlastname_sort_s+asc&query=*%3A*&queryoption=TEACHER&queryBy=schoolId&sid=" + str( UTid ) )
         jsonPage = json.loads( profsOnCurrentPage.content )
@@ -116,6 +118,8 @@ def scrape( fileName ):
   
         #Iterate through each professor.
         for j in range( len( currentPageList ) ):
+            time.sleep( 5 )
+
             #Get overall information about professor.
             if currentPageList[j]['overall_rating'] != "N/A":
                 professorP = Professor( int( currentPageList[j]['tNumRatings'] ), currentPageList[j]['tDept'], currentPageList[j]['tFname'], currentPageList[j]['tMiddlename'], currentPageList[j]['tLname'], float( currentPageList[j]['overall_rating'] ) )
@@ -127,19 +131,30 @@ def scrape( fileName ):
 
             #Get professor's page.
             profURL = "https://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + str(currentPageList[j]['tid'])
+            print( "Professor: " + professorP.fullName )
             
-            # figure out how many times you need to load more reviews
-            numButtonClicks = math.ceil(professorP.numReviews / 20)
-            
-            # prepare button for clicking
-            driver = webdriver.Chrome()
-            driver.get(profURL)
-            loadMoreButton = driver.find_element_by_class_name("Buttons__Button-sc-19xdot-1 PaginationButton__StyledPaginationButton-txi1dr-1 eaZArN")
-            
-            for i in range(numButtonClicks - 1):
-	        # click "Load More Ratings" button
-                loadMoreButton.click()
-	    
+            #Figure out how many times you need to load more reviews.
+            if professorP.numReviews > 20:
+                numButtonClicks = math.ceil(professorP.numReviews / 20)
+                
+                #Prepare button for clicking.
+                driver = webdriver.Chrome( executable_path = "C:\\Users\\Shivam\\Desktop\\CS\\git\\cs\\cs545\\RateMyProfessors\\chromedriver.exe" )
+                driver.get( profURL )
+                #loadMoreButton = driver.find_element_by_class_name( "Buttons__Button-sc-19xdot-1 PaginationButton__StyledPaginationButton-txi1dr-1 eaZArN" )
+
+                waitClose = WebDriverWait( driver, 1 )
+                closeButton = waitClose.until( EC.element_to_be_clickable( ( By.CLASS_NAME, "FullPageModal__StyledCloseIcon-sc-1tziext-0" ) ) )
+                closeButton.click();
+
+                wait = WebDriverWait( driver, 1 )
+                loadMoreButton = wait.until( EC.element_to_be_clickable( ( By.CLASS_NAME, "PaginationButton__StyledPaginationButton-txi1dr-1" ) ) )
+                
+                #Click "Load More Ratings" button.
+                for i in range( numButtonClicks - 1 ):
+                    loadMoreButton.click()
+                
+                driver.quit()
+
             profPage = requests.get( profURL )
             profInfo = BeautifulSoup( profPage.text, "html.parser" )
 
@@ -204,8 +219,15 @@ def scrape( fileName ):
     return professors, numProfsWithReviews, professorsWithoutReviews, numProfsWithoutReviews
 
 def loadJson( fileName ):
-    #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-    print( "TODO " + fileName )
+    print( "Reading scraped information from " + fileName + "." )
+    with open( fileName, "r" ) as inFile:
+        profsWithReviews = json.load( inFile )
+        return profsWithReviews
+
+def storeJson( fileName, profsWithReviews ):
+    print( "Printing scraped information to " + fileName + "." )
+    with open( fileName, "w" ) as outFile:
+        json.dump( profsWithReviews, outFile )
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -218,14 +240,15 @@ if __name__ == "__main__":
     if args.scrape.lower() == "true" or args.scrape.lower() == "t":
         print( "Scrape is set to true. Calling scrape function." )
         if args.output is not None:
-            profsWR, numProfsWR, profsWNoR, numProfsWNoR = scrape( args.output )
+            profsWR, numProfsWR, profsWNoR, numProfsWNoR = scrape()
+            storeJson( args.output, profsWR )
         else:
             print( "File for writing scraped data is not specified. Use -o option with output file name." )
             exit()
     else:
         print( "Scrape is set to false. Calling load function." )
         if args.input is not None:
-            loadJson( args.input )
+            profsWR = loadJson( args.input )
         else:
             print( "File for loading JSON is not specified. Use -i option with input file name." )
             exit()
