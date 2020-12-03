@@ -17,26 +17,14 @@ import json
 import math
 from bs4 import BeautifulSoup
 import argparse
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import time
 
 #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 '''
 TODO
-@scrape:
-!add sleep
-!!!get more than 20 reviews!
-!!write scraped data to json file for storage
-
 @analysis:
 make everything lowercase
-????: merge same professors (variance?)
-
-@load json:
-write function to load json data from stored file
+do analysis
 '''
 #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 
@@ -131,30 +119,6 @@ def scrape():
 
             #Get professor's page.
             profURL = "https://www.ratemyprofessors.com/ShowRatings.jsp?tid=" + str(currentPageList[j]['tid'])
-            print( "Professor: " + professorP.fullName )
-            
-            #Figure out how many times you need to load more reviews.
-            if professorP.numReviews > 20:
-                numButtonClicks = math.ceil(professorP.numReviews / 20)
-                
-                #Prepare button for clicking.
-                driver = webdriver.Chrome( executable_path = "C:\\Users\\Shivam\\Desktop\\CS\\git\\cs\\cs545\\RateMyProfessors\\chromedriver.exe" )
-                driver.get( profURL )
-                #loadMoreButton = driver.find_element_by_class_name( "Buttons__Button-sc-19xdot-1 PaginationButton__StyledPaginationButton-txi1dr-1 eaZArN" )
-
-                waitClose = WebDriverWait( driver, 1 )
-                closeButton = waitClose.until( EC.element_to_be_clickable( ( By.CLASS_NAME, "FullPageModal__StyledCloseIcon-sc-1tziext-0" ) ) )
-                closeButton.click();
-
-                wait = WebDriverWait( driver, 1 )
-                loadMoreButton = wait.until( EC.element_to_be_clickable( ( By.CLASS_NAME, "PaginationButton__StyledPaginationButton-txi1dr-1" ) ) )
-                
-                #Click "Load More Ratings" button.
-                for i in range( numButtonClicks - 1 ):
-                    loadMoreButton.click()
-                
-                driver.quit()
-
             profPage = requests.get( profURL )
             profInfo = BeautifulSoup( profPage.text, "html.parser" )
 
@@ -195,7 +159,7 @@ def scrape():
                 professorReview = Review( profBody, profTags, profQuality, profDifficulty )
                 professorP.addReview( professorReview )
 
-            #print( professorP.fullName + ": " + str( professorP.numReviews ) + " reviews, list: " + str( len( professorP.reviews ) ) )
+            print( professorP.fullName + ": " + str( professorP.numReviews ) + " reviews, list: " + str( len( professorP.reviews ) ) )
 
             #Add professor to list of professors.
             if len( professorP.reviews ) == 0:
@@ -211,10 +175,13 @@ def scrape():
 
         iteration += 1
         if iteration % 100 == 0:
+            print()
             print( "Finished " + str( iteration ) + " professors." )
+            print()
 
     print( "There are " + str( numProfsWithReviews ) + " professors with reviews." )
     print( "There are " + str( numProfsWithoutReviews ) + " professors without reviews." )
+    print( "Got a total of " + str( totalReviews ) + " reviews." )
 
     return professors, numProfsWithReviews, professorsWithoutReviews, numProfsWithoutReviews
 
