@@ -74,6 +74,17 @@ class Encoder( JSONEncoder ):
     def default( self, obj ):
         return obj.__dict__
 
+def loadJson( fileName ):
+    print( "Reading scraped information from " + fileName + "." )
+    with open( fileName, "r" ) as inFile:
+        profsWithReviews = json.load( inFile )
+        return profsWithReviews
+
+def storeJson( fileName, profsWithReviews ):
+    print( "Printing scraped information to " + fileName + "." )
+    with open( fileName, "w" ) as outFile:
+        outFile.write( json.dumps( profsWithReviews, cls = Encoder ) )
+
 def scrape():    
     #This the UT's school ID on RateMyProfessors.
     UTid = 1385
@@ -185,17 +196,6 @@ def scrape():
     print( "Got a total of " + str( totalReviews ) + " reviews." )
 
     return professors, numProfsWithReviews, professorsWithoutReviews, numProfsWithoutReviews
-
-def loadJson( fileName ):
-    print( "Reading scraped information from " + fileName + "." )
-    with open( fileName, "r" ) as inFile:
-        profsWithReviews = json.load( inFile )
-        return profsWithReviews
-
-def storeJson( fileName, profsWithReviews ):
-    print( "Printing scraped information to " + fileName + "." )
-    with open( fileName, "w" ) as outFile:
-        json.dump( profsWithReviews, outFile )
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
