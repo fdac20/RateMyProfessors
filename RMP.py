@@ -18,6 +18,7 @@ import math
 from bs4 import BeautifulSoup
 import argparse
 import time
+from json import JSONEncoder
 
 #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 '''
@@ -68,7 +69,11 @@ class Professor():
         print( "Length of reviews list: " + str( len( self.reviews ) ) )
         print( "Overall rating: " + str( self.overallRating ) )
         print()
-   
+
+class Encoder( JSONEncoder ):
+    def default( self, obj ):
+        return obj.__dict__
+
 def scrape():    
     #This the UT's school ID on RateMyProfessors.
     UTid = 1385
@@ -163,12 +168,8 @@ def scrape():
 
             #Add professor to list of professors.
             if len( professorP.reviews ) == 0:
-                professorsWithoutReviews[professorP.firstName] = professorP
-                professorsWithoutReviews[professorP.lastName] = professorP
                 professorsWithoutReviews[professorP.fullName] = professorP
             else:
-                professors[professorP.firstName] = professorP
-                professors[professorP.lastName] = professorP
                 professors[professorP.fullName] = professorP
 
             totalReviews += len( professorP.reviews )
