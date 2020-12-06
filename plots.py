@@ -10,25 +10,6 @@ from PIL import Image
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from dictor import dictor
 
-"""
-def func1(data):
-    for key,value in data.items():
-        if str(key) == 'reviewTags':
-            print (str(key)+'->'+str(value))
-            continue
-        else: 
-            break
-        if type(value) == type(dict()):
-            func1(value)
-        elif type(value) == type(list()):
-            for val in value:
-                if type(val) == type(str()):
-                    pass
-                elif type(val) == type(list()):
-                    pass
-                else:
-                    func1(val)
-"""
 def Convert(a):
     #b = dict([i.split(': ') for i in a])
     #final = dict((k, v) for k, v in b.items())
@@ -78,14 +59,20 @@ for k,v in data.items():
 
 #Try to print review tags:
 dept = ['']
+tags = ''
 for k,v in data.items():
-    search_string = k + '.reviews.0.reviewTags.0'
+    search_string = k + '.reviews.0.reviewTags'
     print("search string is " + str(search_string))
-    department = dictor(data, str(search_string))
-    print(department)
-        #department = dictor(data, search_string)
-        #print(department)
-"""
+    reviewTag = dictor(data, str(search_string), default='None')
+    #Change reviewTag to a string with each list element concatenated on:
+
+    for i in reviewTag:
+        if(str(i) == 'None'):
+            break
+        tags = tags + ' ' + str(i) + ' '
+#    tags.append(reviewTag)
+wordcloud = WordCloud().generate(tags)
+
 #Create bar graph with department and score
 dept = ['']
 score = ['']
@@ -101,9 +88,7 @@ axs[2].plot(dept,score)
 fig.suptitle('Overall rating')
 plt.show()
 
-myprint(data)
-#print_dict(data)
-
+"""
 #Create word cloud with professor's tags:
 #func1(data)
 text= ['']
