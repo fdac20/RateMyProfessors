@@ -72,6 +72,7 @@ for k,v in data.items():
         tags = tags + ' ' + str(i) + ' '
 #    tags.append(reviewTag)
 wordcloud = WordCloud().generate(tags)
+cloud = wordcloud.to_file('wordcloud1.png')
 
 #Create bar graph with department and score
 dept = ['']
@@ -87,7 +88,8 @@ axs[1].scatter(dept, score)
 axs[2].plot(dept,score)
 fig.suptitle('Overall rating')
 plt.show()
-
+plt.savefig('bar.png')
+   # if(none != 1):
 """
 #Create word cloud with professor's tags:
 #func1(data)
