@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from os import path
 from PIL import Image
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+from dictor import dictor
 
 """
 def func1(data):
@@ -64,13 +65,27 @@ def print_dict(dictionary):
 
 # TEST CODE
 lst = ['a', 1, 'b', 2, 'c', 3]
-print(Convert(lst))
+#print(Convert(lst))
 
 #Get data:
 with open('data.json', "r") as f:
   data = json.load(f)
 
+for k,v in data.items():
+    search_string = k + '.department'
+#    print("search string is " + str(search_string))
+    department = dictor(data, str(search_string))
 
+#Try to print review tags:
+dept = ['']
+for k,v in data.items():
+    search_string = k + '.reviews.0.reviewTags.0'
+    print("search string is " + str(search_string))
+    department = dictor(data, str(search_string))
+    print(department)
+        #department = dictor(data, search_string)
+        #print(department)
+"""
 #Create bar graph with department and score
 dept = ['']
 score = ['']
@@ -92,11 +107,11 @@ myprint(data)
 #Create word cloud with professor's tags:
 #func1(data)
 text= ['']
-for element in data:
+"for element in data:
     for names in data[element]:
         for reviews in names['reviews']:
             print(reviews.get('reviewTags'))
-
+"
 #    for value in element:
 #        var1 = data[element][value]['reviewTags']
 #        for n3 in value:
@@ -108,5 +123,5 @@ for element in data:
 #Word cloud for highest rated prof:
 
 #Word cloud for lowest rated prof:
-
+"""
 
