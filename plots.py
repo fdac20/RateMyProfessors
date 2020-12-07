@@ -10,39 +10,6 @@ from PIL import Image
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from dictor import dictor
 
-def Convert(a):
-    #b = dict([i.split(': ') for i in a])
-    #final = dict((k, v) for k, v in b.items())
-    #final = {k:v for k,v in (x.split(':') for x in a) }
-    return a
-
-def myprint(d):
-    for k, v in d.items():
-        print("HEYYYYYYYYYYYYYYYYYYYYY!!!")
-        print(k)
-        if (k == "reviews"):
-            #print("REVIEWS TYPE COMING!!!!!!!!!")
-            #print(type(v))
-            # convert list to dick
-            # converting list v 
-            v = Convert(v)
-            #myprint(v)
-        # when dick conversion is working, change to elif????
-        if isinstance(v, dict):
-            print(str(v) + " is a dict")
-            myprint(v)
-        else:
-            print("{0} : {1}".format(k, v))
-
-def print_dict(dictionary):
-    dictionary_array = [dictionary]
-    for sub_dictionary in dictionary_array:
-        if type(sub_dictionary) is dict:
-            for key, value in sub_dictionary.items():
-                print("key=", key)
-                print("value", value)
-                if type(value) is dict:
-                    dictionary_array.append(value)
 
 # TEST CODE
 lst = ['a', 1, 'b', 2, 'c', 3]
@@ -57,22 +24,6 @@ for k,v in data.items():
 #    print("search string is " + str(search_string))
     department = dictor(data, str(search_string))
 """
-#Try to print review tags:
-dept = ['']
-tags = ''
-for k,v in data.items():
-    search_string = k + '.reviews.0.reviewTags'
-#    print("search string is " + str(search_string))
-    reviewTag = dictor(data, str(search_string), default='None')
-    #Change reviewTag to a string with each list element concatenated on:
-
-    for i in reviewTag:
-        if(str(i) == 'None'):
-            break
-        tags = tags + ' ' + str(i) + ' '
-#    tags.append(reviewTag)
-wordcloud = WordCloud().generate(tags)
-cloud = wordcloud.to_file('wordcloud1.png')
 """
 #Create dictionary with department and average overall score:
 dept = ['']
@@ -108,7 +59,7 @@ ax.bar(avgrats.keys(), avgrats.values())
 plt.savefig('overall_rating_dept_bar')
 
 search_string = 'Douglas Aaron.reviews.0.reviewTags'
-print(dictor(data, search_string))
+#print(dictor(data, search_string))
 
 
 #Create dictionary with department and average quality:
@@ -120,19 +71,19 @@ for k, v in data.items():
     count +=1
     search_string1 = k + '.department'
     search_string2 = k + '.reviews.0.quality' #TODO: currently only getting first of each review, fix so we get all of them?
-    print(dictor(data, search_string1))
-    print(dictor(data, search_string2))
+ #   print(dictor(data, search_string1))
+ #   print(dictor(data, search_string2))
     if count != 53 and count != 95 and count != 115 and count != 243 and count != 410 and count != 660 and count != 717 and count != 804 and count != 942 and count != 966:
         if dictor(data, '.department') in avgrats.keys():
             avgrats.update({dictor(data, search_string1) : (avgrats[dictor(data, search_string1)] + dictor(data, search_string2)/2)})
-            print(avgrats[dictor(data, search_string1)])
+#            print(avgrats[dictor(data, search_string1)])
         else:
             avgrats.update({dictor(data, search_string1) : dictor(data, search_string2)})
-            print(avgrats[dictor(data, search_string1)])
+#            print(avgrats[dictor(data, search_string1)])
     if count > 1094:
         break
-    print(count)
-    print(avgrats)
+#    print(count)
+#    print(avgrats)
 
 #Create bar graph for average quality score per dept:
 fig, ax = plt.subplots(figsize=(64, 48))
@@ -170,32 +121,220 @@ ax.set_ylabel('Rating')
 ax.bar(avgrats.keys(), avgrats.values())
 plt.savefig('difficulty_rating_dept_bar')
 
-"""
-fig, axs = plt.subplots(1,3, figsize=(9,3), sharey=True)
-axs[0].bar(dept, score)
-axs[1].scatter(dept, score)
-axs[2].plot(dept,score)
-fig.suptitle('Overall rating')
-plt.show()
-plt.savefig('bar.png')
 
-"""
-#Create word cloud with professor's tags:
-#func1(data)
-#text= ['']
-#"for element in data:
-#    for names in data[element]:
-#        for reviews in names['reviews']:
-#            print(reviews.get('reviewTags'))
-#"
-#    for value in element:
-#        var1 = data[element][value]['reviewTags']
-#        for n3 in value:
- #           var = data[element][value]['reviewTags'][n3]
-#text.append(data['Douglas Aaron']['reviewTags2'])
-#text.append(data['Douglas Aaron']['reviewTags3'])
-#iwordcloud = WordCloud().generate(text)
+
+#Find lowest rated prof (difficulty) per dept:
+low_prof = {} #key is dept, value is prof (get rating from data.json)
+high_prof = {}#same format as other
+count = 0
+for k, v in data.items():
+    search_string0 = k + '.department'
+    search_string = k + '.reviews.0.difficulty'
+
+    if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
+        if dictor(data, '.department') in low_prof.keys():
+            search_stringbase = low_prof[dictor(data, search_string0)] + '.reviews.0.difficulty'
+            if dictor(data, search_string) < dictor(data, search_stringbase):
+                low_prof.update({dictor(data,search_string0) : dictor(data,k)})
+            print(low_prof[dictor(data, search_string0)])
+        else:
+            low_prof.update({dictor(data, search_string0) : k})
+#    print(count)
+#    print(low_prof)
+
+    count +=1
+    if count > 1094:
+        break
+
+#Find highest rated prof (difficulty) per dept:
+count = 0
+for k, v in data.items():
+    search_string0 = k + '.department'
+    search_string = k + '.reviews.0.difficulty'
+
+    if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
+        if dictor(data, '.department') in high_prof.keys():
+            search_stringbase = low_prof[dictor(data, search_string0)] + '.reviews.0.difficulty'
+            if dictor(data, search_string) < dictor(data, search_stringbase):
+                high_prof.update({dictor(data,search_string0) : dictor(data,k)})
+            print(high_prof[dictor(data, search_string0)])
+        else:
+            high_prof.update({dictor(data, search_string0) : k})
+#    print(count)
+#    print(high_prof)
+
+    count +=1
+    if count > 1094:
+        break
+
+#Bar graph with highest and lowest rated professor (difficulty) per dept:
+barWidth = .25;
+bars1 = []
+for v in low_prof:
+    search_string = low_prof[v] + '.reviews.0.difficulty'
+    bars1.append(dictor(data, search_string))
+
+bars2 = []
+for v in high_prof:
+    search_string = high_prof[v] + '.reviews.0.difficulty'
+    bars2.append(dictor(data, search_string))
+
+r1 = np.arange(len(bars1))
+r2 = [x + barWidth for x in r1]
+
+plt.bar(r1, bars1, color = '#557f2d', width = barWidth, edgecolor = 'white', label = 'lowest rated prof')
+plt.bar(r2, bars2, color = '#2d7f5e', width = barWidth, edgecolor = 'white', label = 'highest rated prof')
+
+plt.xlabel('department')
+plt.title('Best and Worst Professors by difficulty rating')
+plt.legend();
+plt.savefig('difficulty ratings for best and worst')
+
+
+#Find lowest rated prof (quality) per dept:
+low_prof = {} #key is dept, value is prof (get rating from data.json)
+high_prof = {}#same format as other
+count = 0
+for k, v in data.items():
+    search_string0 = k + '.department'
+    search_string = k + '.reviews.0.quality'
+
+    if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
+        if dictor(data, '.department') in low_prof.keys():
+            search_stringbase = low_prof[dictor(data, search_string0)] + '.reviews.0.quality'
+            if dictor(data, search_string) < dictor(data, search_stringbase):
+                low_prof.update({dictor(data,search_string0) : dictor(data,k)})
+            print(low_prof[dictor(data, search_string0)])
+        else:
+            low_prof.update({dictor(data, search_string0) : k})
+#    print(count)
+#    print(low_prof)
+
+    count +=1
+    if count > 1094:
+        break
+
+#Find highest rated prof (difficulty) per dept:
+count = 0
+for k, v in data.items():
+    search_string0 = k + '.department'
+    search_string = k + '.reviews.0.quality'
+
+    if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
+        if dictor(data, '.department') in high_prof.keys():
+            search_stringbase = low_prof[dictor(data, search_string0)] + '.reviews.0.quality'
+            if dictor(data, search_string) < dictor(data, search_stringbase):
+                high_prof.update({dictor(data,search_string0) : dictor(data,k)})
+            print(high_prof[dictor(data, search_string0)])
+        else:
+            high_prof.update({dictor(data, search_string0) : k})
+#    print(count)
+#    print(high_prof)
+
+    count +=1
+    if count > 1094:
+        break
+
+#Bar graph with highest and lowest rated professor (difficulty) per dept:
+barWidth = .25;
+bars1 = []
+for v in low_prof:
+    search_string = low_prof[v] + '.reviews.0.quality'
+    bars1.append(dictor(data, search_string))
+
+bars2 = []
+for v in high_prof:
+    search_string = high_prof[v] + '.reviews.0.quality'
+    bars2.append(dictor(data, search_string))
+
+r1 = np.arange(len(bars1))
+r2 = [x + barWidth for x in r1]
+
+plt.bar(r1, bars1, color = '#557f2d', width = barWidth, edgecolor = 'white', label = 'lowest rated prof')
+plt.bar(r2, bars2, color = '#2d7f5e', width = barWidth, edgecolor = 'white', label = 'highest rated prof')
+
+plt.xlabel('department')
+plt.title('Best and Worst Professors by quality rating')
+plt.legend();
+plt.savefig('quality ratings for best and worst')
+#Bar graph with highest and lowest rated professor (quality) per dept:
+
+
+#Create word cloud with professor's tags for given department:
+
+#Try to print review tags:
+dept = ['']
+tags = ''
+for k,v in data.items():
+    search_string = k + '.reviews.0.reviewTags'
+#    print("search string is " + str(search_string))
+    reviewTag = dictor(data, str(search_string), default='None')
+    #Change reviewTag to a string with each list element concatenated on:
+
+    for i in reviewTag:
+        if(str(i) == 'None'):
+            break
+        tags = tags + ' ' + str(i) + ' '
+#    tags.append(reviewTag)
+wordcloud = WordCloud().generate(tags)
+cloud = wordcloud.to_file('wordcloud_overall.png')
+
+#Word cloud specifically for engineering:
+tags = ''
+for k,v in data.items():
+    search_string = k + '.reviews.0.reviewTags'
+    ssd = k + '.department'
+    if dictor(data, ssd) == 'Engineering':
+        reviewTag = dictor(data, str(search_string), default='None')
+
+    for i in reviewTag:
+        if(str(i) == 'None'):
+            break
+        tags = tags + ' ' + str(i) + ' '
+
+wordcloud = WordCloud().generate(tags)
+cloud = wordcloud.to_file('wordcloud_engineering.png')
+
+#Find highest rated prof:
+best = dictor(data, 'Douglas Aaron')
+bss = 'Douglas Aaron.overallRating'
+for v in high_prof:
+    search_string = high_prof[v] + '.overallRating'
+    if dictor(data, bss) < dictor(data, search_string):
+        bss = search_string
+        best = high_prof[v]
 
 #Word cloud for highest rated prof:
+tags = ''
+search_string = best + '.reviews.0.reviewTags'
+print(dictor(data, str(search_string)))
+reviewTag = dictor(data, str(search_string), default='None')
+for i in reviewTag:
+    if(str(i) == 'None'):
+        break
+    tags = tags + ' ' + str(i) + ' '
+wordcloud = WordCloud().generate(tags)
+cloud = wordcloud.to_file('wordcloud_best.png')
+print(best)
 
+#Find lowest rated prof:
+worst = dictor(data, 'Douglas Aaron')
+bss = 'Douglas Aaron.overallRating'
+for v in high_prof:
+    search_string = high_prof[v] + '.overallRating'
+    if dictor(data, bss) > dictor(data, search_string):
+        bss = search_string
+        worst = high_prof[v]
+print(worst)
+
+tags = ''
 #Word cloud for lowest rated prof:
+search_string = worst + '.reviews.0.reviewTags'
+#print(dictor(data, str(search_string)))
+reviewTag = dictor(data, str(search_string), default='None')
+for i in reviewTag:
+    if(str(i) == 'None'):
+        break
+    tags = tags + ' ' + str(i) + ' '
+wordcloud = WordCloud().generate(tags)
+cloud = wordcloud.to_file('wordcloud_worst.png')
