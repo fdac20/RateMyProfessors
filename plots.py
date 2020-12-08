@@ -36,10 +36,10 @@ for k, v in data.items():
     search_string2 = k + '.overallRating'
     if count != 53 and count != 95 and count != 115 and count != 243 and count != 410 and count != 660 and count != 717 and count != 804 and count != 942 and count != 966:
         if dictor(data, '.department') in avgrats.keys():
-            avgrats.update({dictor(data, search_string1) : (avgrats[dictor(data, search_string1)] + dictor(data, search_string2)/2)})
+            avgrats.update({dictor(data, search_string1) : (float(avgrats[dictor(data, search_string1)] + dictor(data, search_string2)/2))})
  #           print(avgrats[dictor(data, search_string1)])
         else:
-            avgrats.update({dictor(data, search_string1) : dictor(data, search_string2)})
+            avgrats.update({dictor(data, search_string1) : float(dictor(data, search_string2))})
 #            print(avgrats[dictor(data, search_string1)])
     if count > 1094:
         break
@@ -55,6 +55,8 @@ fig, ax = plt.subplots(figsize=(64, 48))
 ax.set_title('Average Overall Rating of Professor per department')
 ax.set_xlabel('Department')
 ax.set_ylabel('Rating')
+ax.set_xticklabels(avgrats.keys(), rotation = 90)
+plt.gcf().subplots_adjust(bottom=.2)
 ax.bar(avgrats.keys(), avgrats.values())
 plt.savefig('overall_rating_dept_bar')
 
@@ -71,30 +73,32 @@ for k, v in data.items():
     count +=1
     search_string1 = k + '.department'
     search_string2 = k + '.reviews.0.quality' #TODO: currently only getting first of each review, fix so we get all of them?
- #   print(dictor(data, search_string1))
- #   print(dictor(data, search_string2))
     if count != 53 and count != 95 and count != 115 and count != 243 and count != 410 and count != 660 and count != 717 and count != 804 and count != 942 and count != 966:
         if dictor(data, '.department') in avgrats.keys():
-            avgrats.update({dictor(data, search_string1) : (avgrats[dictor(data, search_string1)] + dictor(data, search_string2)/2)})
-#            print(avgrats[dictor(data, search_string1)])
+            avgrats.update({dictor(data, search_string1) : float(avgrats[dictor(data, search_string1)] + dictor(data, search_string2)/2)})
         else:
-            avgrats.update({dictor(data, search_string1) : dictor(data, search_string2)})
-#            print(avgrats[dictor(data, search_string1)])
+            avgrats.update({dictor(data, search_string1) : float(dictor(data, search_string2))})
     if count > 1094:
         break
-#    print(count)
-#    print(avgrats)
 
-#Create bar graph for average quality score per dept:
-fig, ax = plt.subplots(figsize=(64, 48))
-#ax = figure.add_axes([0,0,1,1])
-ax.set_title('Average Quality Rating of Professor per department')
-ax.set_xlabel('Department')#TODO: order y-axis from 1 - 5 like a normal human
-ax.set_ylabel('Rating')
-ax.bar(avgrats.keys(), avgrats.values())
-plt.savefig('quality_rating_dept_bar')
+#Graph:
+fig, ax = plt.subplots(figsize = (20, 15))
+plt.tight_layout()
+x = avgrats.keys()
+y = avgrats.values()
+x_len = np.arange(len(x))
+g1 = ax.bar(x, y, .5, label='Average Overall Quality Rating')
+ax.set_xticks(x_len)
+ax.set_xticklabels(x, rotation = 90)
+ax.tick_params(axis = 'both', which = 'major', labelsize=12)
 
-#Dict, avg difficulty per dept:
+plt.gcf().subplots_adjust(bottom=.2)
+
+plt.xticks(rotation = 90)
+ax.set_title('Average Overall Quality Rating per Department')
+plt.savefig('quality rating per dept.png')
+
+#Average difficulty per dept:
 dept = ['']
 score = []
 avgrats = {}
@@ -105,21 +109,29 @@ for k, v in data.items():
     search_string2 = k + '.reviews.0.difficulty'
     if count != 53 and count != 95 and count != 115 and count != 243 and count != 410 and count != 660 and count != 717 and count != 804 and count != 942 and count != 966:
         if dictor(data, '.department') in avgrats.keys():
-            avgrats.update({dictor(data, search_string1) : (avgrats[dictor(data, search_string1)] + dictor(data, search_string2)/2)})
+            avgrats.update({dictor(data, search_string1) : float((avgrats[dictor(data, search_string1)] + dictor(data, search_string2)/2))})
  #           print(avgrats[dictor(data, search_string1)])
         else:
-            avgrats.update({dictor(data, search_string1) : dictor(data, search_string2)})
+            avgrats.update({dictor(data, search_string1) : float(dictor(data, search_string2))})
 #            print(avgrats[dictor(data, search_string1)])
     if count > 1094:
         break
-#bar graph, avg difficulty per dept:
-fig, ax = plt.subplots(figsize=(64, 48))
-#ax = figure.add_axes([0,0,1,1])
-ax.set_title('Average Difficulty Rating of Professor per department')
-ax.set_xlabel('Department')
-ax.set_ylabel('Rating')
-ax.bar(avgrats.keys(), avgrats.values())
-plt.savefig('difficulty_rating_dept_bar')
+#Graph:
+fig, ax = plt.subplots(figsize = (20, 15))
+plt.tight_layout()
+x = avgrats.keys()
+y = avgrats.values()
+x_len = np.arange(len(x))
+g1 = ax.bar(x, y, .35, label='Average Overall Difficulty Rating')
+ax.set_xticks(x_len)
+ax.set_xticklabels(x, rotation = 90)
+ax.tick_params(axis = 'both', which = 'major', labelsize=12)
+
+plt.gcf().subplots_adjust(bottom=.2)
+
+plt.xticks(rotation = 90)
+ax.set_title('Average Overall Difficulty Rating per Department')
+plt.savefig('difficulty rating per dept.png')
 
 
 
@@ -130,65 +142,85 @@ count = 0
 for k, v in data.items():
     search_string0 = k + '.department'
     search_string = k + '.reviews.0.difficulty'
-
+    
     if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
-        if dictor(data, '.department') in low_prof.keys():
-            search_stringbase = low_prof[dictor(data, search_string0)] + '.reviews.0.difficulty'
+        if dictor(data, search_string0) in low_prof.keys():
+            search_stringbase = str(low_prof[dictor(data, search_string0)]) + '.reviews.0.difficulty'
+#            print('department: ', dictor(data, search_string0))
+#            print('new: ', dictor(data, search_string))
+#            print('current:',dictor(data, search_stringbase))
             if dictor(data, search_string) < dictor(data, search_stringbase):
-                low_prof.update({dictor(data,search_string0) : dictor(data,k)})
-            print(low_prof[dictor(data, search_string0)])
+                low_prof.update({dictor(data,search_string0) : k})
         else:
             low_prof.update({dictor(data, search_string0) : k})
-#    print(count)
-#    print(low_prof)
-
     count +=1
+    
     if count > 1094:
         break
+
 
 #Find highest rated prof (difficulty) per dept:
 count = 0
 for k, v in data.items():
     search_string0 = k + '.department'
     search_string = k + '.reviews.0.difficulty'
-
     if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
-        if dictor(data, '.department') in high_prof.keys():
-            search_stringbase = low_prof[dictor(data, search_string0)] + '.reviews.0.difficulty'
-            if dictor(data, search_string) < dictor(data, search_stringbase):
-                high_prof.update({dictor(data,search_string0) : dictor(data,k)})
-            print(high_prof[dictor(data, search_string0)])
+        if dictor(data, search_string0) in high_prof.keys():
+            search_stringbase = str(low_prof[dictor(data, search_string0)]) + '.reviews.0.difficulty'
+            if dictor(data, search_string) > dictor(data, search_stringbase):
+                high_prof.update({dictor(data,search_string0) : k})
         else:
             high_prof.update({dictor(data, search_string0) : k})
-#    print(count)
-#    print(high_prof)
-
+    
     count +=1
     if count > 1094:
         break
 
+
 #Bar graph with highest and lowest rated professor (difficulty) per dept:
 barWidth = .25;
-bars1 = []
+bars1 = {}
+count = 0
+#print('lowest: ', low_prof)
+#print('')
+#print('highest:', high_prof)
 for v in low_prof:
-    search_string = low_prof[v] + '.reviews.0.difficulty'
-    bars1.append(dictor(data, search_string))
+    x_string = low_prof[v] + '.department'
+    search_string = str(low_prof[v]) + '.reviews.0.difficulty'
+    if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
+        bars1.update({dictor(data, x_string): float(dictor(data, search_string))})
+    count+=1
 
-bars2 = []
+bars2 = {}
+count = 0
 for v in high_prof:
+    x_string = high_prof[v] + '.department'
     search_string = high_prof[v] + '.reviews.0.difficulty'
-    bars2.append(dictor(data, search_string))
+    if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
+        bars2.update({dictor(data, x_string): float(dictor(data, search_string))})
+    count +=1
 
-r1 = np.arange(len(bars1))
-r2 = [x + barWidth for x in r1]
+fig, ax = plt.subplots(figsize = (20, 15))
+plt.tight_layout()
+x1 = bars1.keys()
+y1 = bars1.values()
+x2 = bars2.keys()
+y2 = bars2.values()
+x = np.arange(len(x1))
+g1 = ax.bar(x - barWidth/2, y1, barWidth, label='worst')
+g2 = ax.bar(x + barWidth/2, y2, barWidth, label='best')
+ax.set_xticks(x)
+ax.set_xticklabels(x1, rotation = 90)
+ax.tick_params(axis = 'both', which = 'major', labelsize=8)
 
-plt.bar(r1, bars1, color = '#557f2d', width = barWidth, edgecolor = 'white', label = 'lowest rated prof')
-plt.bar(r2, bars2, color = '#2d7f5e', width = barWidth, edgecolor = 'white', label = 'highest rated prof')
+plt.gcf().subplots_adjust(bottom=.2)
+plt.legend()
 
-plt.xlabel('department')
-plt.title('Best and Worst Professors by difficulty rating')
-plt.legend();
-plt.savefig('difficulty ratings for best and worst')
+plt.xticks(rotation = 90)
+ax.set_title('Best and Worst Professors by Difficulty Rating per Department')
+plt.savefig('difficulty ratings for best and worst.png', bbox_inches='tight')
+
+
 
 
 #Find lowest rated prof (quality) per dept:
@@ -263,8 +295,8 @@ y1 = bars1.values()
 x2 = bars2.keys()
 y2 = bars2.values()
 x = np.arange(len(x1))
-g1 = ax.bar(x - barWidth/2, y1, barWidth, label='low')
-g2 = ax.bar(x + barWidth/2, y2, barWidth, label='high')
+g1 = ax.bar(x - barWidth/2, y1, barWidth, label='worst')
+g2 = ax.bar(x + barWidth/2, y2, barWidth, label='best')
 ax.set_xticks(x)
 ax.set_xticklabels(x1, rotation = 90)
 ax.tick_params(axis = 'both', which = 'major', labelsize=8)
@@ -273,7 +305,7 @@ plt.gcf().subplots_adjust(bottom=.2)
 plt.legend()
 
 plt.xticks(rotation = 90)
-ax.set_title('Best and Worst Professors by quality rating')
+ax.set_title('Best and Worst Professors by Quality Rating per Department')
 
 plt.savefig('quality ratings for best and worst.png', bbox_inches='tight')
 
