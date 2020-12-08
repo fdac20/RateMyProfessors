@@ -198,66 +198,85 @@ count = 0
 for k, v in data.items():
     search_string0 = k + '.department'
     search_string = k + '.reviews.0.quality'
-
+    
     if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
-        if dictor(data, '.department') in low_prof.keys():
-            search_stringbase = low_prof[dictor(data, search_string0)] + '.reviews.0.quality'
+        if dictor(data, search_string0) in low_prof.keys():
+            search_stringbase = str(low_prof[dictor(data, search_string0)]) + '.reviews.0.quality'
+#            print('department: ', dictor(data, search_string0))
+#            print('new: ', dictor(data, search_string))
+#            print('current:',dictor(data, search_stringbase))
             if dictor(data, search_string) < dictor(data, search_stringbase):
-                low_prof.update({dictor(data,search_string0) : dictor(data,k)})
-            print(low_prof[dictor(data, search_string0)])
+                low_prof.update({dictor(data,search_string0) : k})
         else:
             low_prof.update({dictor(data, search_string0) : k})
-#    print(count)
-#    print(low_prof)
-
     count +=1
+    
     if count > 1094:
         break
 
-#Find highest rated prof (difficulty) per dept:
+
+#Find highest rated prof (quality) per dept:
 count = 0
 for k, v in data.items():
     search_string0 = k + '.department'
     search_string = k + '.reviews.0.quality'
-
     if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
-        if dictor(data, '.department') in high_prof.keys():
-            search_stringbase = low_prof[dictor(data, search_string0)] + '.reviews.0.quality'
-            if dictor(data, search_string) < dictor(data, search_stringbase):
-                high_prof.update({dictor(data,search_string0) : dictor(data,k)})
-            print(high_prof[dictor(data, search_string0)])
+        if dictor(data, search_string0) in high_prof.keys():
+            search_stringbase = str(low_prof[dictor(data, search_string0)]) + '.reviews.0.quality'
+            if dictor(data, search_string) > dictor(data, search_stringbase):
+                high_prof.update({dictor(data,search_string0) : k})
         else:
             high_prof.update({dictor(data, search_string0) : k})
-#    print(count)
-#    print(high_prof)
-
+    
     count +=1
     if count > 1094:
         break
 
-#Bar graph with highest and lowest rated professor (difficulty) per dept:
-barWidth = .25;
-bars1 = []
-for v in low_prof:
-    search_string = low_prof[v] + '.reviews.0.quality'
-    bars1.append(dictor(data, search_string))
 
-bars2 = []
-for v in high_prof:
-    search_string = high_prof[v] + '.reviews.0.quality'
-    bars2.append(dictor(data, search_string))
-
-r1 = np.arange(len(bars1))
-r2 = [x + barWidth for x in r1]
-
-plt.bar(r1, bars1, color = '#557f2d', width = barWidth, edgecolor = 'white', label = 'lowest rated prof')
-plt.bar(r2, bars2, color = '#2d7f5e', width = barWidth, edgecolor = 'white', label = 'highest rated prof')
-
-plt.xlabel('department')
-plt.title('Best and Worst Professors by quality rating')
-plt.legend();
-plt.savefig('quality ratings for best and worst')
 #Bar graph with highest and lowest rated professor (quality) per dept:
+barWidth = .25;
+bars1 = {}
+count = 0
+#print('lowest: ', low_prof)
+#print('')
+#print('highest:', high_prof)
+for v in low_prof:
+    x_string = low_prof[v] + '.department'
+    search_string = str(low_prof[v]) + '.reviews.0.quality'
+    if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
+        bars1.update({dictor(data, x_string): float(dictor(data, search_string))})
+    count+=1
+
+bars2 = {}
+count = 0
+for v in high_prof:
+    x_string = high_prof[v] + '.department'
+    search_string = high_prof[v] + '.reviews.0.quality'
+    if count != 52 and count != 94 and count != 114 and count != 242 and count != 409 and count != 659 and count != 716 and count != 803 and count != 941 and count != 965:
+        bars2.update({dictor(data, x_string): float(dictor(data, search_string))})
+    count +=1
+
+fig, ax = plt.subplots(figsize = (20, 15))
+plt.tight_layout()
+x1 = bars1.keys()
+y1 = bars1.values()
+x2 = bars2.keys()
+y2 = bars2.values()
+x = np.arange(len(x1))
+g1 = ax.bar(x - barWidth/2, y1, barWidth, label='low')
+g2 = ax.bar(x + barWidth/2, y2, barWidth, label='high')
+ax.set_xticks(x)
+ax.set_xticklabels(x1, rotation = 90)
+ax.tick_params(axis = 'both', which = 'major', labelsize=8)
+
+plt.gcf().subplots_adjust(bottom=.2)
+plt.legend()
+
+plt.xticks(rotation = 90)
+ax.set_title('Best and Worst Professors by quality rating')
+
+plt.savefig('quality ratings for best and worst.png', bbox_inches='tight')
+
 
 
 #Create word cloud with professor's tags for given department:
@@ -307,7 +326,6 @@ for v in high_prof:
 #Word cloud for highest rated prof:
 tags = ''
 search_string = best + '.reviews.0.reviewTags'
-print(dictor(data, str(search_string)))
 reviewTag = dictor(data, str(search_string), default='None')
 for i in reviewTag:
     if(str(i) == 'None'):
@@ -315,7 +333,7 @@ for i in reviewTag:
     tags = tags + ' ' + str(i) + ' '
 wordcloud = WordCloud().generate(tags)
 cloud = wordcloud.to_file('wordcloud_best.png')
-print(best)
+#print(best)
 
 #Find lowest rated prof:
 worst = dictor(data, 'Douglas Aaron')
@@ -325,7 +343,7 @@ for v in high_prof:
     if dictor(data, bss) > dictor(data, search_string):
         bss = search_string
         worst = high_prof[v]
-print(worst)
+#print(worst)
 
 tags = ''
 #Word cloud for lowest rated prof:
